@@ -1,15 +1,7 @@
-.DS_Store
+# AI-generated .gitignore file
+.DS_Store 
 
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
+__pycache__/ 
+*.pyc
 
 venv/
-env/
-.venv/
-.env/
-
-*.zip
-*.tar.gz
-*.tmp
