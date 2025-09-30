@@ -1,0 +1,15 @@
+.DS_Store
+
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+venv/
+env/
+.venv/
+.env/
+
+*.zip
+*.tar.gz
+*.tmp
