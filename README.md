@@ -13,6 +13,8 @@
 # Data Analysis Results
 
 {List the questions and the answers you found by doing this analysis.}
+1. Which skills are most in-demand?
+2. What is the average salary by job title or location?
 
 # Development Environment
 
