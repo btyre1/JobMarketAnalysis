@@ -2,36 +2,25 @@ import pandas as pd
 
 df = pd.read_csv("../data/linkedin-job-postings/postings.csv")
 
-# Fill missing median salaries row-wise
-df['med_salary'] = df.apply(
-    lambda row: row['med_salary'] if pd.notna(row['med_salary']) else (row['min_salary'] + row['max_salary']) / 2,
-    axis=1
-)
+df['med_salary'] = df['med_salary'].fillna((df['min_salary'] + df['max_salary']) / 2)
 
-# Drop rows missing important info
-df_clean = df.dropna(subset=['title', 'location', 'med_salary', 'pay_period']).copy()
+df_clean = df.dropna(subset=['title', 'location', 'med_salary', 'pay_period'])
+df_clean = df_clean.copy()
 
-# Normalize salaries to yearly
 def normalize_salary(row):
     if row['pay_period'] == 'Hourly':
-        return row['med_salary'] * 40 * 52
+        return row['med_salary'] * 40 * 52   
     elif row['pay_period'] == 'Monthly':
-        return row['med_salary'] * 12
-    else:
+        return row['med_salary'] * 12        
+    else:  
         return row['med_salary']
 
 df_clean['salary_yearly'] = df_clean.apply(normalize_salary, axis=1)
+df_clean = df_clean[df_clean['salary_yearly'] < 500_000]
 
-# Remove zero or unrealistic salaries
-df_clean = df_clean[df_clean['salary_yearly'] > 0]
+top_titles = (df_clean.groupby('title')['salary_yearly'].mean().sort_values(ascending=False).head(10).reset_index())
 
-# Top 20 job titles by average yearly salary
-avg_salary_title = (
-    df_clean.groupby('title')['salary_yearly']
-    .mean()
-    .sort_values(ascending=False)
-    .head(20)
-)
+top_titles['salary_yearly'] = top_titles['salary_yearly'].apply(lambda x: f"${x:,.0f}")
+top_titles.index = top_titles.index + 1
 
-print(avg_salary_title)
-
+print(top_titles)
