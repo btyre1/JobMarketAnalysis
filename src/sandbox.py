@@ -16,11 +16,11 @@ def normalize_salary(row):
         return row['med_salary']
 
 df_clean['salary_yearly'] = df_clean.apply(normalize_salary, axis=1)
-df_clean = df_clean[df_clean['salary_yearly'] < 500_000]
 
-top_titles = (df_clean.groupby('title')['salary_yearly'].mean().sort_values(ascending=False).head(10).reset_index())
 
-top_titles['salary_yearly'] = top_titles['salary_yearly'].apply(lambda x: f"${x:,.0f}")
-top_titles.index = top_titles.index + 1
+top_locations = (df_clean.groupby('location')['salary_yearly'].mean().sort_values(ascending=False).head(10).reset_index())
 
-print(top_titles)
+top_locations['salary_yearly'] = top_locations['salary_yearly'].apply(lambda x: f"${x:,.0f}")
+top_locations.index = top_locations.index + 1
+
+print(top_locations)
