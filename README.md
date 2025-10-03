@@ -14,7 +14,8 @@
 
 {List the questions and the answers you found by doing this analysis.}
 1. Which skills are most in-demand?
-2. What is the average salary by job title or location?
+2. What are the top paying job titles on average?
+3. What are the top paying locations on average?
 
 # Development Environment
 
