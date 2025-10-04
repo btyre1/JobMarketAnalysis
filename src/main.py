@@ -1,11 +1,31 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# ==========================================================
+#                 LINKEDIN JOB DATA ANALYSIS
+# ==========================================================
+# This script performs:
+#   1. Data cleaning and salary normalization
+#   2. Skill extraction and frequency analysis
+#   3. Salary insights by job title and location
+#   4. Visualization of top in-demand skills
+# ==========================================================
+
+
 # -------------------------
 # Load & Clean Salary Data
 # -------------------------
 def load_data(file_path):
+    """
+    Load and clean salary data from a CSV file.
 
+    Steps:
+      - Fill missing median salaries using avg(min, max)
+      - Normalize all salaries to yearly values
+      - Remove incomplete rows and extreme outliers
+    """
+
+    # Load dataset into DataFrame
     df = pd.read_csv(file_path)
 
     # Fill missing median salaries with average of min and max
@@ -18,12 +38,13 @@ def load_data(file_path):
     # Normalize salaries to yearly
     def normalize_salary(row):
         if row['pay_period'] == 'Hourly':
-            return row['med_salary'] * 40 * 52   # Assume 40 hrs a week
+            return row['med_salary'] * 40 * 52   # Assume 40 hrs a week times by 52 weeks in a year
         elif row['pay_period'] == 'Monthly':
-            return row['med_salary'] * 12        
+            return row['med_salary'] * 12        # 12 months a year
         else:  
             return row['med_salary']
         
+    # Apply normalization across dataset
     df_clean['salary_yearly'] = df_clean.apply(normalize_salary, axis=1)
 
     # Remove extreme outliers over $500k a year
@@ -35,19 +56,30 @@ def load_data(file_path):
 # Top Skills Analysis
 # -------------------------
 def get_top_skills(df, n=30):
+    """
+    Extract and count the most common skills from job postings.
 
-    # Clean up skills text
+    Steps:
+      - Clean skill text field
+      - Split skills into separate rows
+      - Normalize skill names (lowercase, trim, etc.)
+      - Remove irrelevant terms and merge similar skills
+      - Count unique jobs mentioning each skill
+    """
+
+    # Remove boilerplate text from skills column
     df['skills_clean'] = df['skills_desc'].str.replace(r'This position requires the following skills:\s*', '', regex=True)
 
-     # Split skills while keeping job_id
+    # Split skills while keeping job_id
     df_exploded = (df[['job_id', 'skills_clean']].dropna().assign(skill=lambda x: x['skills_clean'].str.split(',')).explode('skill'))
+
     df_exploded['skill'] = df_exploded['skill'].str.strip().str.lower()
 
     # Remove irrelevant words
     irrelevant = ['color', 'religion', 'age', 'national origin', 'sexual orientation', 'sex', 'disability', 'gender identity']
     df_exploded = df_exploded[~df_exploded['skill'].isin(irrelevant)]
 
-    # Combine similar skills
+    # Merge similar skills
     df_exploded['skill_clean'] = df_exploded['skill'].replace({
         'verbal / written communication': 'communication',
         'csr / volunteer coordination': 'volunteer coordination',
@@ -68,7 +100,7 @@ def get_top_skills(df, n=30):
         'vision': 'optometry'
     })
 
-    # Deduplicate so each job_id only counts once per skill
+    # Avoid double-counting, so one skill per job posting
     df_unique = df_exploded.drop_duplicates(subset=['job_id', 'skill_clean'])
 
     # Count postings per skill
@@ -79,6 +111,9 @@ def get_top_skills(df, n=30):
     return top_skills
 
 def plot_top_skills(top_skills):
+    """
+    Visualize the most in-demand skills as a horizontal bar chart.
+    """
     plt.figure(figsize=(10, 6))
     plt.barh(top_skills['skill'], top_skills['count'], color='skyblue')
     plt.gca().invert_yaxis()  # largest at top
@@ -91,15 +126,22 @@ def plot_top_skills(top_skills):
 # Salary Analysis
 # -------------------------
 def get_highest_paying_titles(df, n=10):
+    """
+    Compute the top n job titles based on average annual salary.
+    """
 
     top_titles = (df.groupby('title')['salary_yearly'].mean().sort_values(ascending=False).head(n). reset_index())
 
+    # Format salary values for readability
     top_titles['salary_yearly'] = top_titles['salary_yearly'].apply(lambda x: f"${x:,.0f}")
     top_titles.index = top_titles.index + 1
 
     return top_titles
 
 def get_highest_paying_locations(df, n=10):
+    """
+    Compute the top n locations based on average annual salary.
+    """
 
     top_locations = (df.groupby('location')['salary_yearly'].mean().sort_values(ascending=False).head(n).reset_index())
 
@@ -112,6 +154,16 @@ def get_highest_paying_locations(df, n=10):
 # Main Program
 # -------------------------
 def main():
+    """
+    Main entry point for job posting analysis.
+
+    Steps:
+      1. Load raw and cleaned datasets
+      2. Identify most in-demand skills
+      3. Find top-paying job titles
+      4. Find top-paying locations
+      5. Visualize results
+    """
 
     # Raw dataset for skills analysis
     raw_df = pd.read_csv("../data/linkedin-job-postings/postings.csv")
@@ -135,6 +187,7 @@ def main():
     top_locations = get_highest_paying_locations(clean_df)
     print(top_locations)
 
+# Run program
 if __name__ == "__main__":
     main()
     
