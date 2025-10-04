@@ -12,7 +12,7 @@ def get_top_skills(df, n=30):
         df[['job_id', 'skills_clean']]
         .dropna()
         .assign(skill=lambda x: x['skills_clean'].str.split(','))
-        .explode('skill')
+        .explode('skill_desc')
     )
     df_exploded['skill'] = df_exploded['skill'].str.strip().str.lower()
 

@@ -1,8 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+ 
+# AI helped with the comments in this file to be more professional and clear
 
 # ==========================================================
-#                 LINKEDIN JOB DATA ANALYSIS
+#            2023-2024 LINKEDIN JOB DATA ANALYSIS
 # ==========================================================
 # This script performs:
 #   1. Data cleaning and salary normalization
@@ -31,7 +33,7 @@ def load_data(file_path):
     # Fill missing median salaries with average of min and max
     df['med_salary'] = df['med_salary'].fillna((df['min_salary'] + df['max_salary']) / 2)
 
-    # Drop rows missing key info
+    # Drop rows missing key info (AI used to research and use dropna() function)
     df_clean = df.dropna(subset=['title', 'location', 'med_salary', 'pay_period'])
     df_clean = df_clean.copy()
 
@@ -44,7 +46,7 @@ def load_data(file_path):
         else:  
             return row['med_salary']
         
-    # Apply normalization across dataset
+    # Apply normalization across dataset (AI used to research and use apply() function)
     df_clean['salary_yearly'] = df_clean.apply(normalize_salary, axis=1)
 
     # Remove extreme outliers over $500k a year
@@ -67,19 +69,19 @@ def get_top_skills(df, n=30):
       - Count unique jobs mentioning each skill
     """
 
-    # Remove boilerplate text from skills column
+    # Remove boilerplate text from skills column (AI used to research str.replace(), regex, and sintax)
     df['skills_clean'] = df['skills_desc'].str.replace(r'This position requires the following skills:\s*', '', regex=True)
 
-    # Split skills while keeping job_id
+    # Split skills while keeping job_id (AI used to research explode(), assign(), and refresh myself on lambda functions)
     df_exploded = (df[['job_id', 'skills_clean']].dropna().assign(skill=lambda x: x['skills_clean'].str.split(',')).explode('skill'))
 
     df_exploded['skill'] = df_exploded['skill'].str.strip().str.lower()
 
     # Remove irrelevant words
     irrelevant = ['color', 'religion', 'age', 'national origin', 'sexual orientation', 'sex', 'disability', 'gender identity']
-    df_exploded = df_exploded[~df_exploded['skill'].isin(irrelevant)]
+    df_exploded = df_exploded[~df_exploded['skill'].isin(irrelevant)]  # (AI helped with the ~ operator for negation)
 
-    # Merge similar skills
+    # Merge similar skills (AI used to figure out similar skills)
     df_exploded['skill_clean'] = df_exploded['skill'].replace({
         'verbal / written communication': 'communication',
         'csr / volunteer coordination': 'volunteer coordination',
@@ -100,7 +102,7 @@ def get_top_skills(df, n=30):
         'vision': 'optometry'
     })
 
-    # Avoid double-counting, so one skill per job posting
+    # Avoid double-counting, so one skill per job posting (AI used to research drop_duplicates())
     df_unique = df_exploded.drop_duplicates(subset=['job_id', 'skill_clean'])
 
     # Count postings per skill
@@ -110,6 +112,7 @@ def get_top_skills(df, n=30):
 
     return top_skills
 
+# AI and YouTube used to help learn matplotlib for visualization
 def plot_top_skills(top_skills):
     """
     Visualize the most in-demand skills as a horizontal bar chart.
@@ -132,7 +135,7 @@ def get_highest_paying_titles(df, n=10):
 
     top_titles = (df.groupby('title')['salary_yearly'].mean().sort_values(ascending=False).head(n). reset_index())
 
-    # Format salary values for readability
+    # Format salary values for readability (AI again helped with lambda and apply())
     top_titles['salary_yearly'] = top_titles['salary_yearly'].apply(lambda x: f"${x:,.0f}")
     top_titles.index = top_titles.index + 1
 
@@ -171,18 +174,18 @@ def main():
     # Cleaned dataset for salary analysis
     clean_df = load_data("../data/linkedin-job-postings/postings.csv")
 
-    # Q1: Which skills are most in-demand?
+    # Q1: Which skills are most in-demand? (AI for print string)
     print("\n--- Top In-Demand Skills ---")
     top_skills = get_top_skills(raw_df)
     print(top_skills)
     plot_top_skills(top_skills)
 
-    # Q2: What are the top paying job titles on average?
-    print("\n--- Top Paying Job Titles ---")
+    # Q2: What are the top paying job titles on average? (AI for print string)
+    print("\n--- Top Paying Job Titles ---") 
     top_titles = get_highest_paying_titles(clean_df)
     print(top_titles)
 
-    # Q3: What are the top paying locations on average?
+    # Q3: What are the top paying locations on average? (AI for print string)
     print("\n--- Top Paying Locations ---")
     top_locations = get_highest_paying_locations(clean_df)
     print(top_locations)
