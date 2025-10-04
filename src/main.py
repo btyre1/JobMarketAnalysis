@@ -1,86 +1,139 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# -------------------------
+# Load & Clean Salary Data
+# -------------------------
 def load_data(file_path):
 
     df = pd.read_csv(file_path)
+
+    # Fill missing median salaries with average of min and max
     df['med_salary'] = df['med_salary'].fillna((df['min_salary'] + df['max_salary']) / 2)
+
+    # Drop rows missing key info
     df_clean = df.dropna(subset=['title', 'location', 'med_salary', 'pay_period'])
     df_clean = df_clean.copy()
 
+    # Normalize salaries to yearly
     def normalize_salary(row):
         if row['pay_period'] == 'Hourly':
-            return row['med_salary'] * 40 * 52   
+            return row['med_salary'] * 40 * 52   # Assume 40 hrs a week
         elif row['pay_period'] == 'Monthly':
             return row['med_salary'] * 12        
         else:  
             return row['med_salary']
         
     df_clean['salary_yearly'] = df_clean.apply(normalize_salary, axis=1)
+
+    # Remove extreme outliers over $500k a year
     df_clean = df_clean[df_clean['salary_yearly'] < 500_000]
 
     return df_clean
 
-def get_top_skills(n=30):
+# -------------------------
+# Top Skills Analysis
+# -------------------------
+def get_top_skills(df, n=30):
 
-    df = pd.read_csv("../data/linkedin-job-postings/postings.csv")
-
+    # Clean up skills text
     df['skills_clean'] = df['skills_desc'].str.replace(r'This position requires the following skills:\s*', '', regex=True)
 
-    skills_series = df['skills_clean'].dropna().str.split(',').explode().str.strip()
-    skills_series = skills_series.str.lower()
+     # Split skills while keeping job_id
+    df_exploded = (df[['job_id', 'skills_clean']].dropna().assign(skill=lambda x: x['skills_clean'].str.split(',')).explode('skill'))
+    df_exploded['skill'] = df_exploded['skill'].str.strip().str.lower()
 
-    irrelevant = ['color', 'religion', 'age', 'national origin', 'sexual orientation', 'sex', 'disability']
+    # Remove irrelevant words
+    irrelevant = ['color', 'religion', 'age', 'national origin', 'sexual orientation', 'sex', 'disability', 'gender identity']
+    df_exploded = df_exploded[~df_exploded['skill'].isin(irrelevant)]
 
-    skills_series = skills_series[~skills_series.isin(irrelevant)]
-
-    skills_series = skills_series.replace({
+    # Combine similar skills
+    df_exploded['skill_clean'] = df_exploded['skill'].replace({
         'verbal / written communication': 'communication',
         'csr / volunteer coordination': 'volunteer coordination',
-        'elder care': 'healthcare',
+        'relationship building': 'people skills',
+        'networking': 'people skills',
+        'marketing & communications (mar/com)': 'marketing',
+        'hospice care': 'healthcare',
+        'elder care': 'patient care',
+        'contact lenses': 'optometry',
+        'glaucoma': 'optometry',
+        'ocular disease': 'optometry',
+        'cataracts': 'optometry',
+        'eye exams': 'optometry',
+        'cataract': 'optometry',
+        'low vision': 'optometry',
+        'eyewear': 'optometry',
+        'diabetes': 'healthcare',
+        'vision': 'optometry'
     })
 
-    top_skills = skills_series.value_counts().head(n).reset_index()
+    # Deduplicate so each job_id only counts once per skill
+    df_unique = df_exploded.drop_duplicates(subset=['job_id', 'skill_clean'])
+
+    # Count postings per skill
+    top_skills = df_unique['skill_clean'].value_counts().head(n).reset_index()
+    top_skills.columns = ['skill', 'count']
     top_skills.index = top_skills.index + 1
 
     return top_skills
 
+def plot_top_skills(top_skills):
+    plt.figure(figsize=(10, 6))
+    plt.barh(top_skills['skill'], top_skills['count'], color='skyblue')
+    plt.gca().invert_yaxis()  # largest at top
+    plt.title("Top In-Demand Skills", fontsize=14, weight='bold')
+    plt.xlabel("Number of Postings")
+    plt.tight_layout()
+    plt.show()
+
+# -------------------------
+# Salary Analysis
+# -------------------------
 def get_highest_paying_titles(df, n=10):
 
-        top_titles = (df.groupby('title')['salary_yearly'].mean().sort_values(ascending=False).head(n).reset_index())
+    top_titles = (df.groupby('title')['salary_yearly'].mean().sort_values(ascending=False).head(n). reset_index())
 
-        top_titles['salary_yearly'] = top_titles['salary_yearly'].apply(lambda x: f"${x:,.0f}")
-        top_titles.index = top_titles.index + 1
+    top_titles['salary_yearly'] = top_titles['salary_yearly'].apply(lambda x: f"${x:,.0f}")
+    top_titles.index = top_titles.index + 1
 
-        return top_titles
+    return top_titles
 
 def get_highest_paying_locations(df, n=10):
 
-        top_locations = (df.groupby('location')['salary_yearly'].mean().sort_values(ascending=False).head(n).reset_index())
+    top_locations = (df.groupby('location')['salary_yearly'].mean().sort_values(ascending=False).head(n).reset_index())
 
-        top_locations['salary_yearly'] = top_locations['salary_yearly'].apply(lambda x: f"${x:,.0f}")
-        top_locations.index = top_locations.index + 1
+    top_locations['salary_yearly'] = top_locations['salary_yearly'].apply(lambda x: f"${x:,.0f}")
+    top_locations.index = top_locations.index + 1
 
-        return top_locations
+    return top_locations
 
+# -------------------------
+# Main Program
+# -------------------------
 def main():
 
+    # Raw dataset for skills analysis
+    raw_df = pd.read_csv("../data/linkedin-job-postings/postings.csv")
+
+    # Cleaned dataset for salary analysis
     clean_df = load_data("../data/linkedin-job-postings/postings.csv")
 
     # Q1: Which skills are most in-demand?
     print("\n--- Top In-Demand Skills ---")
-    skills = get_top_skills()
-    print(skills)
+    top_skills = get_top_skills(raw_df)
+    print(top_skills)
+    plot_top_skills(top_skills)
 
     # Q2: What are the top paying job titles on average?
     print("\n--- Top Paying Job Titles ---")
-    titles = get_highest_paying_titles(clean_df)
-    print(titles)
+    top_titles = get_highest_paying_titles(clean_df)
+    print(top_titles)
 
     # Q3: What are the top paying locations on average?
     print("\n--- Top Paying Locations ---")
-    locations = get_highest_paying_locations(clean_df)
-    print(locations)
+    top_locations = get_highest_paying_locations(clean_df)
+    print(top_locations)
 
 if __name__ == "__main__":
     main()
