@@ -5,8 +5,6 @@ The dataset I’m using comes from LinkedIn job postings and contains details li
 
 The purpose of writing this software is to provide a tool that can answer important questions about the job market. The program is designed to be modular, so it can be expanded later to include predictive modeling, machine learning for salary predictions, and other advanced features. For more ideas about how I plan to enhance this project, see the future work section at the end.
 
-{Provide a link to your YouTube demonstration.  It should be a 4-5 minute demo of the data set, the questions and answers, the code running and a walkthrough of the code.}
-
 You can watch a demo of my software here: [Software Demo Video](https://youtu.be/rizn9VMIGrw)
 
 # Data Analysis Results
