@@ -1,14 +1,13 @@
 # Overview
+As a software engineer, I am exploring real-world job market data to strengthen my skills in data analysis, Python programming, visualization, etc. This project gives me hands-on experience with the full data science process, from cleaning and organizing data to analyzing it and presenting meaningful results. While building this software, I’m learning how to manage complex datasets, write clean and maintainable code, and uncover useful patterns from raw information.
 
-{Important!  Do not say in this section that this is college assignment.  Talk about what you are trying to accomplish as a software engineer to further your learning.}
+The dataset I’m using comes from LinkedIn job postings and contains details like job titles, salaries, pay periods, locations, required skills, and much more. It’s a large dataset with over 100,000 postings, though for this project I focused on just the main postings.csv file of the 11. Here is a link to it: [Kaggle.com (LinkedIn Job Postings (2023 - 2024) Dataset)](https://www.kaggle.com/datasets/arshkon/linkedin-job-postings)
 
-{Provide a description of the data set that you are analyzing.  Include the link of where you obtained the data.}
-
-{Describe your purpose for writing this software to analyze the data.}
+The purpose of writing this software is to provide a tool that can answer important questions about the job market. The program is designed to be modular, so it can be expanded later to include predictive modeling, machine learning for salary predictions, and other advanced features. For more ideas about how I plan to enhance this project, see the future work section at the end.
 
 {Provide a link to your YouTube demonstration.  It should be a 4-5 minute demo of the data set, the questions and answers, the code running and a walkthrough of the code.}
 
-[Software Demo Video](http://youtube.link.goes.here)
+You can watch a demo of my software here: [Software Demo Video](http://youtube.link.goes.here)
 
 # Data Analysis Results
 
