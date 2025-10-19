@@ -27,6 +27,7 @@ Refer to the requirements.txt file.
 
 * Visual Studio Code
 * Python 3.13.1
+* Virtual Environment (venv)
 * Git / GitHub
 * Matplotlib 3.10.6
 * Numpy 2.3.3
