@@ -1,3 +1,5 @@
+# src/sandbox.py
+
 import pandas as pd
 
 raw_df = pd.read_csv("../data/linkedin-job-postings/postings.csv")

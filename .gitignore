@@ -1,9 +1,14 @@
+# .gitignore
+
 # Partly AI-generated 
+# Ignore system files and Python cache files
 .DS_Store 
 
 __pycache__/ 
 *.pyc
 
+# Ignore virtual environment directories
 venv/
 
+# Ignore Jupyter Notebook checkpoints
 **/.ipynb_checkpoints

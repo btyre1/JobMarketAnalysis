@@ -1,3 +1,5 @@
+# requirements.txt
+
 # AI used to generate this comment below:
 # List of technologies required for this project
 # Tested with Python 3.13.1
